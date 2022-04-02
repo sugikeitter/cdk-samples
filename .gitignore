@@ -1,3 +1,5 @@
+.DS_Store
+
 # CDK Typescript
 bin/*.js
 lib/*.js

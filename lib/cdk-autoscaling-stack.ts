@@ -13,9 +13,12 @@ export class CdkAutoscalingStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
+    const vpcName = process.env.MY_VPC_NAME;
+    const ec2RoleName = process.env.MY_EC2_ROLE_NAME || '';
+
     // TODO vpc名をCFnテンプレート作成時に渡す
     const vpc: ec2.IVpc = ec2.Vpc.fromLookup(this, 'Vpc', {
-      vpcName: process.env.MY_VPC_NAME
+      vpcName: vpcName
     });
 
     const albSg = new ec2.SecurityGroup(this, 'SecurityGroupAlb', {
@@ -26,7 +29,8 @@ export class CdkAutoscalingStack extends Stack {
     const ec2Sg = new ec2.SecurityGroup(this, 'SecurityGroupEc2', {
       vpc: vpc,
     });
-    ec2Sg.addIngressRule(ec2.Peer.securityGroupId(albSg.securityGroupId), ec2.Port.tcp(80));
+    // ALBのListnerとTargetGroupの紐付けあたりでここのルールは自動で設定してくれる
+    // ec2Sg.addIngressRule(ec2.Peer.securityGroupId(albSg.securityGroupId), ec2.Port.tcp(80));
 
     // const imageName: string = process.env.MY_IMG_NAME || '';
     // TODO インスタンスタイプは複数から選べない？というか起動テンプレート使えないの？
@@ -34,16 +38,18 @@ export class CdkAutoscalingStack extends Stack {
     const userData = ec2.UserData.forLinux();
     userData.addCommands(
       "amazon-linux-extras install nginx1",
-      'sed -i".org" -e "/\/h1>$/a <h2>`ec2-metadata -h`</h2>" /usr/share/nginx/html/index.html',
+      'sed -i".org" -e "\\/h1>$/a <h2>`ec2-metadata -h`</h2>" /usr/share/nginx/html/index.html',
       "nginx",
     );
     const targetAsg = new asg.AutoScalingGroup(this, 'Asg', {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.SMALL),
-      machineImage: ec2.MachineImage.latestAmazonLinux(),
+      machineImage: ec2.MachineImage.latestAmazonLinux({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2
+      }),
       userData: userData,
       securityGroup: ec2Sg,
-      role: iam.Role.fromRoleName(this, 'Ec2Role', ''),
+      role: iam.Role.fromRoleName(this, 'Ec2Role', ec2RoleName),
     })
     // targetAsg.scaleOnRequestCount('ScaleOnRequestCount', {targetRequestsPerMinute: 300});
 
