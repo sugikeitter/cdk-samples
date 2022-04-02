@@ -6,6 +6,7 @@ import {
   aws_autoscaling as asg,
   aws_elasticloadbalancingv2 as elbv2,
   aws_iam as iam,
+  Duration,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
@@ -50,6 +51,9 @@ export class CdkAutoscalingStack extends Stack {
       userData: userData,
       securityGroup: ec2Sg,
       role: iam.Role.fromRoleName(this, 'Ec2Role', ec2RoleName),
+      healthCheck: asg.HealthCheck.elb({
+        grace: Duration.seconds(60),
+      }),
     })
     // targetAsg.scaleOnRequestCount('ScaleOnRequestCount', {targetRequestsPerMinute: 300});
 
