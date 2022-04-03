@@ -57,7 +57,7 @@ export class CdkAutoscalingStack extends Stack {
     const userData = ec2.UserData.forLinux();
     userData.addCommands(
       "amazon-linux-extras install nginx1",
-      'sed -i".org" -e "\\/h1>$/a <h2>`ec2-metadata -h`</h2>" /usr/share/nginx/html/index.html',
+      'sed -i".org" -e "\\/h1>$/a <h2 class=\"hostname\">`ec2-metadata -h`</h2>" /usr/share/nginx/html/index.html',
       "nginx",
     );
 
@@ -80,8 +80,8 @@ export class CdkAutoscalingStack extends Stack {
       targetGroupArns: [appTargetGroup.targetGroupArn],
       healthCheckType: "ELB",
       healthCheckGracePeriod: 60,
-      minSize: '2',
-      maxSize: '2',
+      minSize: '3',
+      maxSize: '3',
     })
     // targetAsg.scaleOnRequestCount('ScaleOnRequestCount', {targetRequestsPerMinute: 300});
   }
