@@ -2,6 +2,7 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { CdkAutoscalingStack } from '../lib/cdk-autoscaling-stack';
+import { EcsAsgStack } from '../lib/ecs-autoscaling-stack';
 
 const app = new cdk.App();
 new CdkAutoscalingStack(app, 'CdkAutoscalingStack', {
@@ -18,5 +19,9 @@ new CdkAutoscalingStack(app, 'CdkAutoscalingStack', {
   // env: { account: '123456789012', region: 'us-east-1' },
 
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+  env: { account: process.env.AWS_ACCOUNT_ID, region: process.env.AWS_REGION }
+});
+
+new EcsAsgStack(app, 'EcsAsgStack', {
   env: { account: process.env.AWS_ACCOUNT_ID, region: process.env.AWS_REGION }
 });
