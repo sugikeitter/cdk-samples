@@ -16,7 +16,10 @@ export class RdsPostgresStack extends Stack {
 
     new rds.DatabaseInstance(this, "RdsPostgres", {
       engine: rds.DatabaseInstanceEngine.postgres({ version: rds.PostgresEngineVersion.VER_14_1 }),
-      vpc: props.vpc
+      vpc: props.vpc,
+      multiAz: true,
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.SMALL),
+      storageType: rds.StorageType.GP2,
     });
   }
 }
