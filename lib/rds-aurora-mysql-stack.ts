@@ -19,7 +19,8 @@ export class RdsAuroraMysqlStack extends Stack {
         version: rds.AuroraMysqlEngineVersion.VER_3_01_0,
       }),
       instanceProps: {
-        vpc: props.vpc
+        vpc: props.vpc,
+        instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.SMALL),
       },
     })
   }
