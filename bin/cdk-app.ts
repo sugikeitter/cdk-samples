@@ -3,6 +3,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { CdkAutoscalingStack } from '../lib/cdk-autoscaling-stack';
 import { EcsAlbPatternStack } from '../lib/ecs-alb-pattern-stack';
+import { VpcStack } from '../lib/vpc-stack';
 
 const app = new cdk.App();
 new CdkAutoscalingStack(app, 'CdkAutoscalingStack', {
@@ -23,5 +24,10 @@ new CdkAutoscalingStack(app, 'CdkAutoscalingStack', {
 });
 
 new EcsAlbPatternStack(app, 'EcsAlbPatternStack', {
+  env: { account: process.env.AWS_ACCOUNT_ID, region: process.env.AWS_REGION }
+});
+
+new VpcStack(app, 'VpcStack', {
+  // To use more than 2 AZs, be sure to specify the account and region on your stack.
   env: { account: process.env.AWS_ACCOUNT_ID, region: process.env.AWS_REGION }
 });
