@@ -9,17 +9,22 @@ import {
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
+export interface EcsAlbPatternStackProps extends StackProps {
+  vpc: ec2.Vpc;
+}
+
 export class EcsAlbPatternStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: EcsAlbPatternStackProps) {
     super(scope, id, props);
 
-    const MY_VPC_NAME = process.env.MY_VPC_NAME;
+    // const MY_VPC_NAME = process.env.MY_VPC_NAME;
     const MY_ECR_REPOSITORY_NAME = process.env.MY_ECR_REPOSITORY_NAME || ""
 
     // TODO vpc名をCFnテンプレート作成時に渡す
-    const vpc: ec2.IVpc = ec2.Vpc.fromLookup(this, 'Vpc', {
-      vpcName: MY_VPC_NAME
-    });
+    // const vpc: ec2.IVpc = ec2.Vpc.fromLookup(this, 'Vpc', {
+    //   vpcName: MY_VPC_NAME
+    // });
+    const vpc = props.vpc;
 
     // CI/CDを見越して、CFnの状態をリソースと同期させたいなら、ECSのクラスタとALBとListner/TargetGroupのみの定義（変更があまりない）
     // ECSサービスとCodePipelineを別Stackで用意するのが良さそう（変更が多い？）

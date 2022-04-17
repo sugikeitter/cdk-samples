@@ -25,14 +25,16 @@ new CdkAutoscalingStack(app, 'CdkAutoscalingStack', {
   env: { account: process.env.AWS_ACCOUNT_ID, region: process.env.AWS_REGION }
 });
 
-new EcsAlbPatternStack(app, 'EcsAlbPatternStack', {
-  env: { account: process.env.AWS_ACCOUNT_ID, region: process.env.AWS_REGION }
-});
-
 const vpcStack = new VpcStack(app, 'VpcStack', {
   // To use more than 2 AZs, be sure to specify the account and region on your stack.
   env: { account: process.env.AWS_ACCOUNT_ID, region: process.env.AWS_REGION }
 });
+
+const ecsAlbPatternStack = new EcsAlbPatternStack(app, 'EcsAlbPatternStack', {
+  env: { account: process.env.AWS_ACCOUNT_ID, region: process.env.AWS_REGION },
+  vpc: vpcStack.vpc,
+});
+ecsAlbPatternStack.addDependency(vpcStack);
 
 const rdsPostgresStack = new RdsPostgresStack(app, 'RdsPostgresStack', {
   env: { account: process.env.AWS_ACCOUNT_ID, region: process.env.AWS_REGION },
