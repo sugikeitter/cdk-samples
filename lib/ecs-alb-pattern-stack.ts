@@ -1,4 +1,3 @@
-// TODO import の書き方
 import {
   Stack,
   StackProps,
