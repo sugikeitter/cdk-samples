@@ -55,7 +55,20 @@ export class CdkAutoscalingStack extends Stack {
     ec2Sg.addIngressRule(albSg, ec2.Port.tcp(80));
 
     const userData = ec2.UserData.forLinux();
+    // 本来は必要なパッケージをインストールしたAMIを利用すべき
     userData.addCommands(
+      // "yum install ruby",
+      // "yum install wget",
+
+      // TODO Install CodeDeploy agent
+      /* こっちを使う場合は、Roleに権限が必要
+      "aws ssm send-command"
+      + "--document-name \"AWS-ConfigureAWSPackage\"
+      + "--instance-ids `ec2-metadata -i | awk '{print $2}'`" \
+      + "--parameters '{\"action\":[\"Install\"],\"installationType\":[\"In-place update\"],\"name\":[\"AWSCodeDeployAgent\"]}'" \
+      + "--region `curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e s/.$//`"
+      */
+
       "amazon-linux-extras install nginx1",
       'sed -i".org" -e "\\/h1>$/a <h2 class=\"hostname\">`ec2-metadata -h`</h2>" /usr/share/nginx/html/index.html',
       "nginx",
