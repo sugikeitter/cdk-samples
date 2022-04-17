@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { CdkAutoscalingStack } from '../lib/cdk-autoscaling-stack';
+import { Ec2AsgStack } from '../lib/ec2-asg-stack';
 import { EcsAlbPatternStack } from '../lib/ecs-alb-pattern-stack';
 import { VpcStack } from '../lib/vpc-stack';
 import { RdsPostgresStack } from '../lib/rds-postgres-stack';
 import { RdsAuroraMysqlStack } from '../lib/rds-aurora-mysql-stack';
 
 const app = new cdk.App();
-new CdkAutoscalingStack(app, 'CdkAutoscalingStack', {
+new Ec2AsgStack(app, 'Ec2AsgStack', {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */

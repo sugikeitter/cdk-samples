@@ -9,7 +9,7 @@ import {
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
-export class CdkAutoscalingStack extends Stack {
+export class Ec2AsgStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
