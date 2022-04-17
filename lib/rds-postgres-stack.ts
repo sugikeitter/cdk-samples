@@ -14,6 +14,7 @@ export class RdsPostgresStack extends Stack {
   constructor(scope: Construct, id: string, props: RdsPostgresStackProps) {
     super(scope, id, props);
 
+    // TODO INを許可するSGをEC2/ECSから連携する
     new rds.DatabaseInstance(this, "RdsPostgres", {
       engine: rds.DatabaseInstanceEngine.postgres({ version: rds.PostgresEngineVersion.VER_14_1 }),
       vpc: props.vpc,

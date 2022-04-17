@@ -14,13 +14,14 @@ export class RdsAuroraMysqlStack extends Stack {
   constructor(scope: Construct, id: string, props: RdsAuroraMysqlStackProps) {
     super(scope, id, props);
 
+    // TODO INを許可するSGをEC2/ECSから連携する
     new rds.DatabaseCluster(this, "DbCluster", {
       engine: rds.DatabaseClusterEngine.auroraMysql({
         version: rds.AuroraMysqlEngineVersion.VER_3_01_0,
       }),
       instanceProps: {
         vpc: props.vpc,
-        instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.SMALL),
+        instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MEDIUM),
       },
     })
   }
