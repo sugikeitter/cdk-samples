@@ -10,7 +10,7 @@ import {
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
-export class EcsAsgStack extends Stack {
+export class EcsAlbPatternStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
