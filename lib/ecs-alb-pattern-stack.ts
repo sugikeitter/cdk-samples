@@ -4,8 +4,8 @@ import {
   aws_ec2 as ec2,
   aws_ecr as ecr,
   aws_ecs as ecs,
-  aws_ecs_patterns as ecs_patterns
-
+  aws_ecs_patterns as ecs_patterns,
+  aws_elasticloadbalancingv2 as elbv2,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
@@ -28,7 +28,7 @@ export class EcsAlbPatternStack extends Stack {
 
     // CI/CDを見越して、CFnの状態をリソースと同期させたいなら、ECSのクラスタとALBとListner/TargetGroupのみの定義（変更があまりない）
     // ECSサービスとCodePipelineを別Stackで用意するのが良さそう（変更が多い？）
-    new ecs_patterns.ApplicationLoadBalancedFargateService(this, 'EcsAlbFargateSvcPattern', {
+    const ecsAlbFarget = new ecs_patterns.ApplicationLoadBalancedFargateService(this, 'EcsAlbFargateSvcPattern', {
       vpc: vpc,
       taskSubnets: {
         subnetType: ec2.SubnetType.PRIVATE_WITH_NAT
@@ -43,7 +43,16 @@ export class EcsAlbPatternStack extends Stack {
       deploymentController: {
         type: ecs.DeploymentControllerType.CODE_DEPLOY,
       },
-      // loadBalancer: // Blue/Greenデプロイのためにポート2つ用意したALBが必要な場合は、別途用意が必要
+    });
+    // loadBalancer: // Blue/Greenデプロイのためにポート2つ用意したALBが必要な場合は、別途用意が必要
+    const alb = ecsAlbFarget.loadBalancer;
+    const albSubListner = alb.addListener('albListenerForBGDeploy', {
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      port: 9000,
+      open: true,
+    });
+    albSubListner.addTargets('albTargetForBGDeploy', {
+      port: 80,
     });
 
     // TODO ECSでBlue/GreenするためのCodeDeployを追加したい（でも最終的にはCodePipeline？）
