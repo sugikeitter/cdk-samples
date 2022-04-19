@@ -44,15 +44,22 @@ export class EcsAlbPatternStack extends Stack {
         type: ecs.DeploymentControllerType.CODE_DEPLOY,
       },
     });
+    ecsAlbFarget.targetGroup.configureHealthCheck({
+      path: "/health",
+    });
     // loadBalancer: // Blue/Greenデプロイのためにポート2つ用意したALBが必要な場合は、別途用意が必要
-    const alb = ecsAlbFarget.loadBalancer;
-    const albSubListner = alb.addListener('albListenerForBGDeploy', {
+    const albSubListner = ecsAlbFarget.loadBalancer.addListener('albListenerForBGDeploy', {
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: 9000,
       open: true,
-    });
-    albSubListner.addTargets('albTargetForBGDeploy', {
-      port: 80,
+      defaultTargetGroups: [new elbv2.ApplicationTargetGroup(this, 'albTargetForBGDeploy', {
+        vpc: vpc,
+        targetType: elbv2.TargetType.IP,
+        port: 80,
+        healthCheck: {
+          path: "/health",
+        },
+      })],
     });
 
     // TODO ECSでBlue/GreenするためのCodeDeployを追加したい（でも最終的にはCodePipeline？）
