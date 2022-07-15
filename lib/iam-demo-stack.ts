@@ -35,8 +35,76 @@ export class IamDemoStack extends Stack {
             }
           ]
         })
-      }
+      },
     });
-    // TODO パーミッション境界
+
+    const policyForBoundary = new iam.ManagedPolicy(this, 'policyForBoundary', {
+      managedPolicyName: 'DemoPlicyForBoundary',
+      document: iam.PolicyDocument.fromJson({
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "ec2:RunInstances",
+              "ec2:CreateTags",
+              "ec2:StartInstances",
+              "ec2:StopInstances",
+              "iam:ListInstanceProfiles",
+            ],
+            "Resource": "*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "iam:PassRole"
+            ],
+            "Resource": "*",
+            "Condition": {
+              "StringEquals": {"iam:PassedToService": "ec2.amazonaws.com"},
+            }
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "iam:PassRole"
+            ],
+            "Resource": "*",
+            "Condition": {
+              "StringEquals": {"iam:PassedToService": "lambda.amazonaws.com"},
+            }
+          }
+        ]
+      })
+    });
+
+    const roleWithPermissionBoundary = new iam.Role(this, 'DemoRoleForEC2RunStartStop', {
+      roleName: "DemoRoleForEC2RunStartStop",
+      assumedBy: new iam.ArnPrincipal("arn:aws:iam::" + props.env?.account + ":user/demo-ec2-readonly"),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonEC2ReadOnlyAccess"),
+      ],
+      inlinePolicies: {
+        "ec2RunStartStop": iam.PolicyDocument.fromJson({
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:RunInstances",
+                "ec2:CreateTags",
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "iam:ListInstanceProfiles",
+                "iam:PassRole"
+              ],
+              "Resource": "*"
+            }
+          ]
+        })
+      },
+      // TODO パーミッション境界
+      permissionsBoundary: policyForBoundary
+    });
   }
 }
