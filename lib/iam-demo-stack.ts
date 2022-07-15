@@ -11,6 +11,7 @@ export class IamDemoStack extends Stack {
 
     // IAMユーザーをdemo-***という名前で権限をEC2のReadOnlyで手動で作るけど、EC2のReadOnly+起動/停止できるロール
     const role = new iam.Role(this, 'DemoRoleForEC2RunStartStop', {
+      roleName: "DemoRoleForEC2RunStartStop",
       assumedBy: new iam.ArnPrincipal("arn:aws:iam::" + props.env?.account + ":user/demo-ec2-readonly"),
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonEC2ReadOnlyAccess"),
@@ -23,8 +24,12 @@ export class IamDemoStack extends Stack {
               "Effect": "Allow",
               "Action": [
                 "ec2:RunInstances",
+                "ec2:CreateTags",
                 "ec2:StartInstances",
-                "ec2:StopInstances"
+                "ec2:StopInstances",
+                "iam:ListInstanceProfiles",
+                "iam:GetRole",
+                "iam:PassRole"
               ],
               "Resource": "*"
             }
