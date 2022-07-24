@@ -9,7 +9,8 @@ export class IamDemoStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
 
-    // IAMユーザーをdemo-***という名前で権限をEC2のReadOnlyで手動で作るけど、EC2のReadOnly+起動/停止できるロール
+    // 権限がEC2のReadOnlyのIAMユーザーをdemo-ec2-readonlyという名前で手動作成しておく
+    // demo-ec2-readonlyが、EC2のReadOnly+起動/停止したい場合にAssumeするロール（EC2にアタッチできるプロファイルはAmazonSSMRoleForInstancesQuickSetupのみに絞っている）
     const role = new iam.Role(this, 'DemoRoleForEC2RunStartStop', {
       roleName: "DemoRoleForEC2RunStartStop",
       assumedBy: new iam.ArnPrincipal("arn:aws:iam::" + props.env?.account + ":user/demo-ec2-readonly"),
