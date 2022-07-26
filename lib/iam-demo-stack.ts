@@ -65,22 +65,24 @@ export class IamDemoStack extends Stack {
           {
             "Effect": "Allow",
             "Action": [
+              "ec2:Describe*",
               "ec2:RunInstances",
               "ec2:CreateTags",
               "ec2:StartInstances",
               "ec2:StopInstances",
-              "iam:ListInstanceProfiles",
-              "iam:GetRole",
-              // "iam:PassRole", // EC2, LambdaのみOKのConditionを下で設定
-              "iam:CreateRole",
+              "dynamodb:*",
+              "iam:Get*",
+              "iam:List*",
+              "iam:AddRoleToInstanceProfile", // TODO ここで好きなポリシー付いたロールを自分で作成したInstanceProfileに設定できてしまわない？
               "iam:CreateInstanceProfile",
-              "iam:ListPolicies",
-              "iam:ListRoles",
-              "iam:AttachRolePolicy"
+              // "iam:PassRole", // EC2, Lambdaのみ、特定の名前のロールならOKのConditionを下で設定
+              // "iam:CreateRole", // Permission Boundary付きで特定の名前のロールのみOKを下で設定
+              // "iam:AttachRolePolicy", // Permission Boundary付きで特定の名前のロールのみOKを下で設定
             ],
             "Resource": "*"
           },
           {
+            "Sid": "PassSpecificNameRole",
             "Effect": "Allow",
             "Action": [
               "iam:PassRole"
@@ -90,17 +92,28 @@ export class IamDemoStack extends Stack {
               "arn:aws:iam::" + props.env?.account + ":role/AmazonSSMRoleForInstancesQuickSetup"
             ],
             "Condition": {
-              "StringEquals": {"iam:PassedToService": "ec2.amazonaws.com"},
+              "StringEquals": {
+                "iam:PassedToService": [
+                  "ec2.amazonaws.com",
+                  "lambda.amazonaws.com"
+                ]
+              }
             }
           },
           {
+            "Sid": "RoleCreationWithPrefixAndBoundary",
             "Effect": "Allow",
             "Action": [
-              "iam:PassRole"
+              "iam:CreateRole",
+              "iam:AttachRolePolicy",
             ],
-            "Resource": "arn:aws:iam::" + props.env?.account + ":role/demoBoundaryRole*",
+            "Resource": [
+              "arn:aws:iam::" + props.env?.account + ":role/demoBoundaryRole*"
+            ],
             "Condition": {
-              "StringEquals": {"iam:PassedToService": "lambda.amazonaws.com"},
+              "StringEquals": {
+                "iam:PermissionsBoundary": "arn:aws:iam::" + props.env?.account + ":policy/DemoPlicyForBoundary"
+              }
             }
           },
           {
@@ -150,42 +163,6 @@ export class IamDemoStack extends Stack {
                 "iam:PermissionsBoundary": "arn:aws:iam::" + props.env?.account + ":policy/DemoPlicyForBoundary"
               }
             }
-          },
-          {
-            "Sid": "DenyRoleCreationWithOutPrefix",
-            "Effect": "Deny",
-            "Action": [
-              "iam:CreateRole"
-            ],
-            "NotResource": [
-              "arn:aws:iam::" + props.env?.account + ":role/demoBoundaryRole*"
-            ]
-          },
-          {
-            "Sid": "DenyRoleCreationWithOutPermBoundary",
-            "Effect": "Deny",
-            "Action": [
-              "iam:CreateRole"
-            ],
-            "Resource": [
-              "*"
-            ],
-            "Condition": {
-              "StringNotEquals": {
-                "iam:PermissionsBoundary": "arn:aws:iam::" + props.env?.account + ":policy/DemoPlicyForBoundary"
-              }
-            }
-          },
-          {
-            "Effect": "Allow",
-            "Action": [
-              "ec2:RunInstances",
-              "ec2:CreateTags",
-              "ec2:StartInstances",
-              "ec2:StopInstances",
-              "iam:ListInstanceProfiles",
-            ],
-            "Resource": "*"
           }
         ]
       })
@@ -209,14 +186,14 @@ export class IamDemoStack extends Stack {
                 "ec2:CreateTags",
                 "ec2:StartInstances",
                 "ec2:StopInstances",
-                "iam:ListInstanceProfiles",
-                "iam:GetRole",
-                "iam:PassRole",
-                "iam:CreateRole",
+                "iam:Get*",
+                "iam:List*",
+                "iam:AddRoleToInstanceProfile",
+                "iam:AttachRolePolicy",
                 "iam:CreateInstanceProfile",
-                "iam:ListPolicies",
-                "iam:ListRoles",
-                "iam:AttachRolePolicy"
+                "iam:CreateInstanceProfile",
+                "iam:CreateRole",
+                "iam:PassRole",
               ],
               "Resource": "*"
             }
